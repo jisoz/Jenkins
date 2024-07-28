@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    environment {
+        MYSQL_ROOT_PASSWORD = 'secret'
+        MYSQL_DATABASE = 'todos'
+        MYSQL_USER = 'root'
+        MYSQL_PASSWORD = 'secret'
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/jisoz/Jenkins.git'
+            }
+        }
+        stage('Build and Test') {
+            steps {
+                script {
+                    dockerCompose.up()
+                    dockerCompose.run('app', 'yarn install')
+                    dockerCompose.run('app', 'yarn test')
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                // Add your deployment steps here
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                dockerCompose.down()
+            }
+        }
+    }
+}
+
+def dockerCompose = dockerCompose('docker-compose.yml')
+
+def dockerCompose(String file) {
+    return [
+        up: { -> sh "docker-compose -f ${file} up -d" },
+        down: { -> sh "docker-compose -f ${file} down" },
+        run: { service, cmd -> sh "docker-compose -f ${file} run --rm ${service} ${cmd}" }
+    ]
+}
