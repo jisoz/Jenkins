@@ -7,19 +7,17 @@ pipeline {
         MYSQL_PASSWORD = 'secret'
     }
     stages {
-      
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/jisoz/Jenkins.git'
             }
         }
-       
         stage('Build and Test') {
             steps {
                 script {
-                    dockerCompose.up()
-                    dockerCompose.run('app', 'yarn install')
-                    dockerCompose.run('app', 'yarn test')
+                    dockerCompose().up()
+                    dockerCompose().run('app', 'yarn install')
+                    dockerCompose().run('app', 'yarn test')
                 }
             }
         }
@@ -33,18 +31,16 @@ pipeline {
     post {
         always {
             script {
-                dockerCompose.down()
+                dockerCompose().down()
             }
         }
     }
 }
 
-def dockerCompose = dockerCompose('docker-compose.yml')
-
-def dockerCompose(String file) {
+def dockerCompose() {
     return [
-        up: { -> sh "docker-compose -f ${file} up -d" },
-        down: { -> sh "docker-compose -f ${file} down" },
-        run: { service, cmd -> sh "docker-compose -f ${file} run --rm ${service} ${cmd}" }
+        up: { -> sh "docker-compose -f docker-compose.yml up -d" },
+        down: { -> sh "docker-compose -f docker-compose.yml down" },
+        run: { service, cmd -> sh "docker-compose -f docker-compose.yml run --rm ${service} ${cmd}" }
     ]
 }
