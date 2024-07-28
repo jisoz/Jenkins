@@ -39,7 +39,7 @@ pipeline {
     }
 }
 
-def dockerCompose = dockerCompose('compose.yaml')
+def dockerCompose = dockerCompose('docker-compose.yml')
 
 def dockerCompose(String file) {
     return [
