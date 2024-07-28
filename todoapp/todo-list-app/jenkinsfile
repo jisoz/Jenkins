@@ -7,9 +7,12 @@ pipeline {
         MYSQL_PASSWORD = 'secret'
     }
     stages {
-        stage('Clone Repository') {
+         stage('Checkout') {
             steps {
-                git 'https://github.com/jisoz/Jenkins.git'
+                git(
+                    url: 'https://github.com/jisoz/Jenkins.git',
+                    branch: 'main'
+                )
             }
         }
         stage('Build and Test') {
@@ -37,7 +40,7 @@ pipeline {
     }
 }
 
-def dockerCompose = dockerCompose('docker-compose.yml')
+def dockerCompose = dockerCompose('compose.yaml')
 
 def dockerCompose(String file) {
     return [
