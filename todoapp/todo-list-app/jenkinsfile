@@ -1,46 +1,28 @@
 pipeline {
     agent any
-    environment {
-        MYSQL_ROOT_PASSWORD = 'secret'
-        MYSQL_DATABASE = 'todos'
-        MYSQL_USER = 'root'
-        MYSQL_PASSWORD = 'secret'
-    }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/jisoz/Jenkins.git'
+                git url: 'https://github.com/jisoz/Jenkins.git', branch: 'main'
             }
         }
         stage('Build and Test') {
             steps {
-                script {
-                    dockerCompose().up()
-                    dockerCompose().run('app', 'yarn install')
-                    dockerCompose().run('app', 'yarn test')
-                }
+                sh 'docker-compose -f docker-compose.yml up -d'
             }
         }
         stage('Deploy') {
             steps {
-                echo 'Deploying application...'
-                // Add your deployment steps here
+                // sh 'docker-compose -f docker-compose.yml down'
+                echo "deploying"
             }
         }
     }
+
     post {
         always {
-            script {
-                dockerCompose().down()
-            }
+            sh 'docker-compose -f docker-compose.yml down'
         }
     }
-}
-
-def dockerCompose() {
-    return [
-        up: { -> sh "docker-compose -f docker-compose.yml up -d" },
-        down: { -> sh "docker-compose -f docker-compose.yml down" },
-        run: { service, cmd -> sh "docker-compose -f docker-compose.yml run --rm ${service} ${cmd}" }
-    ]
 }
