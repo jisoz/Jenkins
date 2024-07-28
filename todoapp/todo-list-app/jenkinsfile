@@ -7,13 +7,13 @@ pipeline {
         MYSQL_PASSWORD = 'secret'
     }
     stages {
-        stages {
+      
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/jisoz/Jenkins.git'
             }
         }
-        }
+       
         stage('Build and Test') {
             steps {
                 script {
